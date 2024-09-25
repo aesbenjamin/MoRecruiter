@@ -42,7 +42,7 @@ st.set_page_config(
 	page_title="Alex Benjamin - Conheça este Profissional de TI",
 	page_icon=":trophy:",
 	layout="wide",
-	initial_sidebar_state="expanded",
+	initial_sidebar_state="auto",
 	#menu_items={
 	#	"Conectar Alex no WhatsApp": "https://github.com/AdieLaine/Streamly",
 	#	
@@ -54,7 +54,7 @@ def chat_interface():
 	st.subheader("Clone do Alex Benjamin")
 
 	# List to hold the conversation
-	container = st.container(height=350)
+	container = st.container(height=300)
 	user_input = st.chat_input("Pergunte algo sobre mim:")
 	with container:
 		if 'messages' not in st.session_state:
@@ -96,8 +96,52 @@ def print_images():
 		
 
 # Dividindo a página em colunas
-print_images()
-st.sidebar.write("Alex Benjamin")
+#print_images()
+#st.sidebar.write("Alex Benjamin")
 # Gráfico em tempo real na coluna 1
-chat_interface()
+
+
+
+# Inicializar a lista de imagens
+images = [
+	"./image1.jpg",
+	"./image2.jpg",
+]
+
+# Inicializa o estado da sessão para o índice da imagem atual
+if 'current_image_index' not in st.session_state:
+	st.session_state['current_image_index'] = 0
+
+# Função para avançar no carrossel
+def next_image():
+	st.session_state['current_image_index'] += 1
+	if st.session_state['current_image_index'] >= len(images):
+		st.session_state['current_image_index'] = 0
+
+# Função para retroceder no carrossel
+def prev_image():
+	st.session_state['current_image_index'] -= 1
+	if st.session_state['current_image_index'] < 0:
+		st.session_state['current_image_index'] = len(images) - 1
+
+tab1, tab2 = st.tabs(["Chat", "Galeria"])
+# Mostrar a imagem atual
+
+with tab1:
+	chat_interface()
+
+with tab2:
+	st.image(images[st.session_state['current_image_index']])
+
+# Botões de navegação
+
+with tab2:
+	col1, col2, col3 = st.columns([1, 4, 1])
+	with col1:
+		if st.button("◀️ Anterior"):
+			prev_image()
+
+	with col3:
+		if st.button("Próxima ▶️"):
+			next_image()
 
