@@ -16,7 +16,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from io import BytesIO
 import keyword_list
 import base64
-import platform
 
 os.environ["OPENAI_API_KEY"] = "sk-MDwTK2Wq87oN3qR25-ElhN2XuIU00s_EyGG6QwTqr6T3BlbkFJQXFecaGZq73YsgSeJNVu8EgcDDhB3AVHMFpvp7XDAA"
 
@@ -32,48 +31,21 @@ Settings.llm = llm
 Settings.embed_model = OpenAIEmbedding(model_name="text-embedding-3-small")
 
 if 'index' not in st.session_state:
-	index_tr = load_index_from_storage(StorageContext.from_defaults(persist_dir="./cv"))
+	index_tr = load_index_from_storage(StorageContext.from_defaults(persist_dir="./vecCv"))
 	st.session_state['index'] = index_tr
-	chat_engine = st.session_state.index.as_chat_engine(chat_mode="condense_plus_context",system_prompt=system)
+	chat_engine = st.session_state.index.as_chat_engine(chat_mode="condense_plus_context",system_prompt=system, similarity_top_k=10)
+	chat_engine2 = st.session_state.index.as_chat_engine(chat_mode="condense_plus_context",system_prompt=system, similarity_top_k=30)
 	st.session_state['chat'] = chat_engine
+	st.session_state['chat_analise'] = chat_engine2
 
 chat = st.session_state['chat']
-
+chat_analise = st.session_state['chat_analise']
 st.set_page_config(
 	page_title="Alex Benjamin - Conheça este Profissional de TI",
 	page_icon=":trophy:",
 	layout="wide",
 	initial_sidebar_state="expanded",
 )
-st.markdown(
-	"""
-	<style>
-	.centered-text {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		font-size: 24px;
-		height: 100%;
-		font-weight: bold;
-	}
-	</style>
-	""", unsafe_allow_html=True
-)
-
-
-def get_Hist(pdf: FPDF):
-	str1 = ""
-	if 'messages' in st.session_state:
-		print(f"---------------------\nLEN: {st.session_state['messages']}")
-		for message in st.session_state['messages']:
-				print(f"---------------------\nContent: {message['content']}")
-				str1 = str1 + message['content'] + '\n'
-
-		print(str1)
-		pdf.multi_cell(0, 10, txt=str1)
-
-	return pdf
-
 
 def get_pdf2():
 	# Criar um buffer em memória
@@ -200,7 +172,7 @@ def chat_interface():
 					#st.session_state['messages'].append({'role':'user', 'content': analise})
 					#with st.chat_message("user"):
 					#	st.write(analise)
-					res = chat.stream_chat(analise)
+					res = chat_analise.stream_chat(analise)
 					with st.chat_message("assistant"):
 							st.write_stream(res.response_gen)
 					st.session_state['messages'].append({'role':'assistant', 'content': res.response})
@@ -317,13 +289,12 @@ with tab_cv:
 		pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
 		st.write('Visuzalição do PDF (Apenas para desktop):')
 		st.markdown(pdf_display, unsafe_allow_html=True)		
+
 with tab_contato:
 	col1,col2,col3,col4 = st.columns([1,1,3,3])
 	with col1:
 		st.image(image="./whatsapp.png")
 		st.link_button(label="WhatsApp",url="https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!")
-		#st.markdown('<a href="https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!"><img src="whatsapp.png" alt="Descrição da Imagem" style="width:100%;"></a>', unsafe_allow_html=True)
-		#st.markdown("[![Whatsapp](whatsapp.png)](https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!)")
 	with col2:
 		st.image(image="./linkedin.png")
 		st.link_button(label="Linkedin",url="http://www.linkedin.com/in/alex-benjamin-43b1b438")
