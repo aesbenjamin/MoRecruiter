@@ -16,15 +16,18 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
 from io import BytesIO
 import keyword_list
 import base64
+import translate
 
 os.environ["OPENAI_API_KEY"] = "sk-MDwTK2Wq87oN3qR25-ElhN2XuIU00s_EyGG6QwTqr6T3BlbkFJQXFecaGZq73YsgSeJNVu8EgcDDhB3AVHMFpvp7XDAA"
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-system = """
-					Você é o clone do Alex Benjamin, um Líder em modernização de ambientes de TI legados e especialista em Inteligência Artificial. Vai receber perguntas de recrutadores sobre 
-					capacitações ou curiosidades suas. Não responda sem conhecimento prévio pelo contexto, apenas trabalhe com o 
-					contexto e pergunta passadas.
-		"""
+
+if 'language' not in st.session_state:
+	st.session_state['language'] = 0
+
+language = st.session_state['language']
+
+system = translate.system[language]
 
 llm = OpenAI(temperature=0, model="gpt-4o-mini", system_prompt=system)
 Settings.llm = llm
@@ -40,8 +43,10 @@ if 'index' not in st.session_state:
 
 chat = st.session_state['chat']
 chat_analise = st.session_state['chat_analise']
+
+
 st.set_page_config(
-	page_title="Alex Benjamin - Conheça este Profissional de TI",
+	page_title="Alex Benjamin - Meet this IT Profissional",
 	page_icon=":trophy:",
 	layout="wide",
 	initial_sidebar_state="expanded",
@@ -79,7 +84,7 @@ def get_pdf2():
 				if message['role'] == 'assistant':
 					ini = 'Alex Benjamin: '
 				if message['role'] == 'user':
-					ini = 'Recrutador: '
+					ini = translate.ini[language]
 				msg = ini + message['content']
 				texto_com_html = '<br />'.join(msg.splitlines())
 				paragrafo = Paragraph( texto_com_html, styles["BodyText"]) 
@@ -97,7 +102,7 @@ def get_pdf():
 	pdf = FPDF()
 	pdf.add_page()
 	pdf.set_font("Arial", size=12)
-	pdf.cell(200, 10, txt="Histórico de conversa com o clone do Alex Benjamin", ln=True, align="C")
+	pdf.cell(200, 10, txt=translate.txt[language], ln=True, align="C")
 	if 'messages' in st.session_state:
 		str1 = ""
 		for message in st.session_state['messages']:
@@ -111,27 +116,26 @@ def chat_interface():
 	ph = st.empty()
 	col1, col2 = st.columns([5, 2])
 	with col1:
-		st.subheader("Clone do Alex Benjamin")
+		sub_txt = translate.sub_txt[language]
+		st.subheader(sub_txt)
 
 		# List to hold the conversation
 		container = st.container(height=250)
 		colA, colB,colC = st.columns([5,1,1])
 		with colA:
-			user_input = st.chat_input("Pergunte algo sobre mim:")
+			input_txt = translate.input_txt[language]
+			user_input = st.chat_input(input_txt)
 		with colB:
-			if st.button("Gerar PDF"):
+			txt_pdf = translate.txt_pdf[language]
+			if st.button(txt_pdf):
 				with colC:
-					st.download_button("Baixar PDF", get_pdf2(), file_name= "historico.pdf")
+					txt_baixar_pdf = translate.txt_baixar_pdf[language]
+					st.download_button(txt_baixar_pdf, get_pdf2(), file_name= "MoRecruiter_Alex_history.pdf")
 		with container:
 			if 'messages' not in st.session_state:
 				st.session_state['messages'] = []
-				init_msg = """
-				Olá, eu sou o clone do Alex Benjamin. Fique à vontade para fazer perguntas 
-				profissionais, ou até mesmo pessoais, como curiosidades, ou hobbies :D\n
-				Se você preferir, pode utilizar a análise de conformidade, do lado direito desse chat,
-				uma maneira simples e fácil de analisar se eu sou o candidato ideal para a sua vaga.								
-
-				"""
+				
+				init_msg = translate.init_msg[language]
 
 				st.session_state['messages'].append({'role':'assistant', 'content': init_msg })
 	
@@ -148,27 +152,22 @@ def chat_interface():
 						st.write_stream(res.response_gen)
 				st.session_state['messages'].append({'role':'assistant', 'content': res.response})
 	with col2:
-		st.subheader("Análise de Conformidade")
+		txt_conformidade = translate.txt_conformidade[language]
+		st.subheader(txt_conformidade)
+		txt_multi = translate.txt_multi[language]
 		options = st.multiselect(
-				"Escolha palavras-chave para analisar o índice de alinhamento das capacitações do Alex com a vaga proposta:",
+				txt_multi,
 				keyword_list.key_list,
 				[],
 			)
-		title = st.text_area("Ou se preferir, cole aqui a descrição da vaga:", "")
-		if st.button("Analisar"):
+		txt_descr = translate.txt_descr[language]
+		title = st.text_area(txt_descr, "")
+		txt_analisar = translate.txt_analisar[language]
+		if st.button(txt_analisar):
 			with col1:
 				with container:
-					analise = f"""
-					Analise se o Alex tem as capacitações abaixo:
-					\n
-					Descrição da vaga e palavras-chave:
-					{title}
-					\n
-					{options}
-					\n
-					Ao final, gere um relatório e um índice de conformidade, que representa um percentual
-					de capacitação do Alex em relação as palavras-chave.
-					"""
+					analise_tmp = translate.get_analise(title,options)
+					analise = analise_tmp[language]
 					#st.session_state['messages'].append({'role':'user', 'content': analise})
 					#with st.chat_message("user"):
 					#	st.write(analise)
@@ -213,25 +212,33 @@ def prev_image():
 def sidebar():
 	st.sidebar.image('./image3.jpg')
 	cont = st.sidebar.container()
-	cont.write("""
-			Alex Benjamin
-			\n
-			Líder em Modernização de Sistemas Legados, especialista em 
-			Inteligência Artifical Generativa e Engenheiro de Software há mais 18 anos.
-			\n
-			Utilize o chat ao lado para conhecer um pouco de mim e minhas qualificações.	
-			""")
-	cont.write("""
-			Este site foi construído com Python e Streamlit, e seu backend com o motor MoMapping. \n
-			Acesse o site e saiba mais: 
-			""")
+	sidebar_txt1 = translate.sidebar_txt1[language]
+	cont.write(sidebar_txt1)
+	sidebar_txt2 = translate.sidebar_txt2[language]
+	cont.write(sidebar_txt2)
 	cont.link_button("MoMapping", "https://site.momapping.com.br")
 
-st.subheader("MoRecruiter")
-tab_chat, tab_galeria, tab_video, tab_cv, tab_contato = st.tabs(["Chat", "Galeria", "Video", "Currículo", "Contato"])
+col1, col2, col3, col4 = st.columns([2,1,1,4])
+with col1:
+	st.subheader("MoRecruiter")
+with col2: 
+	if st.button("Português"):
+		st.session_state['language'] = 0
+		del st.session_state['messages']
+		st.rerun()
+
+with col3:
+	if st.button("English"):
+		st.session_state['language'] = 1
+		del st.session_state['messages']
+		st.rerun()
+
+tab_list = translate.tab_list[language]
+tab_chat, tab_galeria, tab_video, tab_cv, tab_contato = st.tabs(tab_list)
 # Mostrar a imagem atual
 
 with tab_chat:
+	
 	chat_interface()
 
 
@@ -240,11 +247,13 @@ with tab_chat:
 with tab_galeria:
 	col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 1,1])
 	with col1:
-		if st.button("◀️ Anterior"):
+		txt_anterior = translate.txt_anterior[language]
+		if st.button(txt_anterior):
 			prev_image()
 
 	with col5:
-		if st.button("Próxima ▶️"):
+		txt_proximo = translate.txt_proximo[language]
+		if st.button(txt_proximo):
 			next_image()
 
 	with col3:
@@ -270,32 +279,36 @@ with tab_video:
 		st.markdown(container_style, unsafe_allow_html=True)
 
 		# Adiciona o container com o texto centralizado
-		st.markdown('<div class="centered-container"><p>Em breve</p></div>', unsafe_allow_html=True)
+		txt_em_breve = translate.txt_em_breve[language]
+		st.markdown(f'<div class="centered-container"><p>{txt_em_breve}</p></div>', unsafe_allow_html=True)
 with tab_cv:
 	col1, col2, col3 = st.columns([1,4,1])
 	with col2:
-		st.title("Curriculum Alex Benjamin")
-		pdf_file_path = "./curriculum_alex_benjamin.pdf"
+		txt_cv = translate.txt_cv[language]
+		st.title(txt_cv)
+		pdf_file_path = translate.pdf_file_path[language]
 		pdf_data = ""
 		with open(pdf_file_path, "rb") as f:
 			pdf_data = f.read()
+		txt_baixar_pdf = translate.txt_baixar_pdf[language]
 		st.download_button(
-			label="Baixar PDF",
+			label=txt_baixar_pdf,
 			data=pdf_data,
 			file_name="curriculum_alex_benjamin.pdf",
 			mime="application/pdf"
 		)
 		base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
 		pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
-		st.write('Visuzalição do PDF (Apenas para desktop):')
+		txt_vis = translate.txt_vis[language]
+		st.write(txt_vis)
 		st.markdown(pdf_display, unsafe_allow_html=True)		
 
 with tab_contato:
-	col1,col2,col3,col4 = st.columns([1,1,3,3])
-	with col1:
+	col1,col2,col3,col4 = st.columns([3,1,1,3])
+	with col2:
 		st.image(image="./whatsapp.png")
 		st.link_button(label="WhatsApp",url="https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!")
-	with col2:
+	with col3:
 		st.image(image="./linkedin.png")
 		st.link_button(label="Linkedin",url="http://www.linkedin.com/in/alex-benjamin-43b1b438")
 
