@@ -24,7 +24,7 @@ load_dotenv()
 
 # Acessa os atributos
 api_key = os.getenv('OPENAI_API_KEY')
-
+os.environ["OPENAI_API_KEY"] = api_key
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 if 'language' not in st.session_state:
