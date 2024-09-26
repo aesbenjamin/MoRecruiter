@@ -1,28 +1,22 @@
 import streamlit as st
+
 from PIL import Image
-import time
-from llama_index.core.indices.property_graph import PropertyGraphIndex
-from llama_index.graph_stores.neo4j import Neo4jPropertyGraphStore
-from llama_index.core import Document
 import os
-import openai
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.vector_stores.neo4jvector import Neo4jVectorStore
-from llama_index.core import SimpleDirectoryReader, KnowledgeGraphIndex, PropertyGraphIndex, Settings
-from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core import  Settings
 from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.graph_stores.neo4j import Neo4jGraphStore
-from llama_index.core.graph_stores import SimpleGraphStore
-#from llama_index.core.chat_engine import 
 import logging
-import nest_asyncio
 import sys
-from llama_index.core.schema import TextNode
-from llama_index.core import DocumentSummaryIndex
 from llama_index.core.retrievers import TreeSelectLeafEmbeddingRetriever, TreeAllLeafRetriever, TreeSelectLeafRetriever, TreeRootRetriever
-from llama_index.core.query_engine import RetrieverQueryEngine
-import re
+from fpdf import FPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from io import BytesIO
+import keyword_list
+import base64
+import platform
 
 os.environ["OPENAI_API_KEY"] = "sk-MDwTK2Wq87oN3qR25-ElhN2XuIU00s_EyGG6QwTqr6T3BlbkFJQXFecaGZq73YsgSeJNVu8EgcDDhB3AVHMFpvp7XDAA"
 
@@ -32,10 +26,7 @@ system = """
 					capacitações ou curiosidades suas. Não responda sem conhecimento prévio pelo contexto, apenas trabalhe com o 
 					contexto e pergunta passadas.
 		"""
-helper_prompt = """
-A pergunta a seguir é sobre a vida profissional de Alex Benjamin, como cargo, empresas, curiosidades:\n
-Não utilize conhecimento prévio, apenas o do contexto:
-"""
+
 llm = OpenAI(temperature=0, model="gpt-4o-mini", system_prompt=system)
 Settings.llm = llm
 Settings.embed_model = OpenAIEmbedding(model_name="text-embedding-3-small")
@@ -52,22 +43,113 @@ st.set_page_config(
 	page_title="Alex Benjamin - Conheça este Profissional de TI",
 	page_icon=":trophy:",
 	layout="wide",
-	initial_sidebar_state="auto",
-	#menu_items={
-	#	"Conectar Alex no WhatsApp": "https://github.com/AdieLaine/Streamly",
-	#	
-	#}
+	initial_sidebar_state="expanded",
 )
+st.markdown(
+	"""
+	<style>
+	.centered-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 24px;
+		height: 100%;
+		font-weight: bold;
+	}
+	</style>
+	""", unsafe_allow_html=True
+)
+
+
+def get_Hist(pdf: FPDF):
+	str1 = ""
+	if 'messages' in st.session_state:
+		print(f"---------------------\nLEN: {st.session_state['messages']}")
+		for message in st.session_state['messages']:
+				print(f"---------------------\nContent: {message['content']}")
+				str1 = str1 + message['content'] + '\n'
+
+		print(str1)
+		pdf.multi_cell(0, 10, txt=str1)
+
+	return pdf
+
+
+def get_pdf2():
+	# Criar um buffer em memória
+	str1 = ""
+	
+	buffer = BytesIO()
+
+	# Criar o documento PDF
+	doc = SimpleDocTemplate(buffer, pagesize=letter)
+	
+	# Estilos de texto (para parágrafos)
+	styles = getSampleStyleSheet()
+
+	# Criar um parágrafo a partir do texto
+	elementos = []
+
+	paragraph_titulo = Paragraph( "MoRecruiter - Alex Benjamin", styles["Title"]) 
+	caminho_imagem = "./image3.jpg"  
+	imagem = Image(caminho_imagem, 200, 300)
+
+
+	elementos.append(paragraph_titulo)
+	elementos.append(Spacer(1, 12))
+	elementos.append(Spacer(1, 12))
+	elementos.append(imagem)
+	elementos.append(Spacer(1, 12))
+
+	if 'messages' in st.session_state:
+		for message in st.session_state['messages']:
+				ini = ""
+				if message['role'] == 'assistant':
+					ini = 'Alex Benjamin: '
+				if message['role'] == 'user':
+					ini = 'Recrutador: '
+				msg = ini + message['content']
+				texto_com_html = '<br />'.join(msg.splitlines())
+				paragrafo = Paragraph( texto_com_html, styles["BodyText"]) 
+				elementos.append(paragrafo)
+				elementos.append(Spacer(1, 12))
+
+	# Criar o PDF com os elementos
+	doc.build(elementos)
+	# Mover o cursor do buffer para o início
+	buffer.seek(0)
+	# O conteúdo binário do PDF está agora no buffer
+	return buffer.getvalue()
+
+def get_pdf():
+	pdf = FPDF()
+	pdf.add_page()
+	pdf.set_font("Arial", size=12)
+	pdf.cell(200, 10, txt="Histórico de conversa com o clone do Alex Benjamin", ln=True, align="C")
+	if 'messages' in st.session_state:
+		str1 = ""
+		for message in st.session_state['messages']:
+				str1 = str1 + message['content'] + '\n'
+		pdf.multi_cell(0, 10, str1)
+	pdf_content = pdf.output(dest='S').encode('utf-8')
+	return pdf_content
 
 # Função para criar um chat simples
 def chat_interface():
+	ph = st.empty()
 	col1, col2 = st.columns([5, 2])
 	with col1:
 		st.subheader("Clone do Alex Benjamin")
 
 		# List to hold the conversation
-		container = st.container(height=300)
-		user_input = st.chat_input("Pergunte algo sobre mim:")
+		container = st.container(height=250)
+		colA, colB,colC = st.columns([5,1,1])
+		with colA:
+			user_input = st.chat_input("Pergunte algo sobre mim:")
+		with colB:
+			if st.button("Gerar PDF"):
+				with colC:
+					st.download_button("Baixar PDF", get_pdf2(), file_name= "historico.pdf")
 		with container:
 			if 'messages' not in st.session_state:
 				st.session_state['messages'] = []
@@ -80,16 +162,7 @@ def chat_interface():
 				"""
 
 				st.session_state['messages'].append({'role':'assistant', 'content': init_msg })
-				#system = """
-				#	Você é o clone do Alex Benjamin. Vai receber perguntas de recrutadores sobre 
-				##	capacitações ou curiosidades suas. Não invente nada, apenas trabalhe com o 
-				#	contexto e pergunta passadas.  Quando perguntarem quem é você, responda que é o Alex Benjamin.
-				#"""
-				#r = chat.chat("quem é você", prompt=system)
-				#st.write(r.response)
-			
-			# Mostra as mensagens anteriores
-				
+	
 			for message in st.session_state['messages']:
 				with st.chat_message( message['role']):
 					st.write(message['content'])
@@ -98,15 +171,15 @@ def chat_interface():
 				st.session_state['messages'].append({'role':'user', 'content': user_input})
 				with st.chat_message("user"):
 					st.write(user_input)
-				res = chat.stream_chat(f"{helper_prompt} {user_input}")
+				res = chat.stream_chat(f"{user_input}")
 				with st.chat_message("assistant"):
 						st.write_stream(res.response_gen)
 				st.session_state['messages'].append({'role':'assistant', 'content': res.response})
 	with col2:
-		st.subheader("Analise de Conformidade")
+		st.subheader("Análise de Conformidade")
 		options = st.multiselect(
 				"Escolha palavras-chave para analisar o índice de alinhamento das capacitações do Alex com a vaga proposta:",
-				["COBOL", "Natural", "Adabas", "Devops"],
+				keyword_list.key_list,
 				[],
 			)
 		title = st.text_area("Ou se preferir, cole aqui a descrição da vaga:", "")
@@ -120,11 +193,7 @@ def chat_interface():
 					{title}
 					\n
 					{options}
-
 					\n
-					
-
-
 					Ao final, gere um relatório e um índice de conformidade, que representa um percentual
 					de capacitação do Alex em relação as palavras-chave.
 					"""
@@ -136,40 +205,32 @@ def chat_interface():
 							st.write_stream(res.response_gen)
 					st.session_state['messages'].append({'role':'assistant', 'content': res.response})
 
-
-
-			
-
-			
-			# Caixa de texto para o usuário
-
 def print_images():
 	#placeholder = st.sidebar.empty()  # Espaço reservado para as imagens
 	image_paths =  ["image1.jpg", "image2.jpg"]
 	for image_path in image_paths:
 			img = Image.open(image_path)
-			
-			# Exibe a imagem no espaço reservado (atualiza no mesmo lugar)
 			st.sidebar.image(img, use_column_width=True)
-			
-			# Aguardar o tempo de transição
 			
 	
 # Inicializar a lista de imagens
 images = [
 	"./image1.jpg",
 	"./image2.jpg",
+	"./image4.jpg",
+	"./image5.jpg",
+	"./image6.jpg",
 ]
 
 # Inicializa o estado da sessão para o índice da imagem atual
 if 'current_image_index' not in st.session_state:
 	st.session_state['current_image_index'] = 0
-
 # Função para avançar no carrossel
 def next_image():
 	st.session_state['current_image_index'] += 1
 	if st.session_state['current_image_index'] >= len(images):
 		st.session_state['current_image_index'] = 0
+	#photo_ph.image(images[st.session_state['current_image_index']])
 
 # Função para retroceder no carrossel
 def prev_image():
@@ -177,24 +238,95 @@ def prev_image():
 	if st.session_state['current_image_index'] < 0:
 		st.session_state['current_image_index'] = len(images) - 1
 
-tab1, tab2 = st.tabs(["Chat", "Galeria"])
+def sidebar():
+	st.sidebar.image('./image3.jpg')
+	cont = st.sidebar.container()
+	cont.write("""
+			Alex Benjamin
+			\n
+			Líder em Modernização de Sistemas Legados, especialista em 
+			Inteligência Artifical Generativa e Engenheiro de Software há mais 18 anos.
+			\n
+			Utilize o chat ao lado para conhecer um pouco de mim e minhas qualificações.	
+			""")
+	cont.write("""
+			Este site foi construído com Python e Streamlit, e seu backend com o motor MoMapping. \n
+			Acesse o site e saiba mais: 
+			""")
+	cont.link_button("MoMapping", "https://site.momapping.com.br")
+
+st.subheader("MoRecruiter")
+tab_chat, tab_galeria, tab_video, tab_cv, tab_contato = st.tabs(["Chat", "Galeria", "Video", "Currículo", "Contato"])
 # Mostrar a imagem atual
 
-with tab1:
+with tab_chat:
 	chat_interface()
 
-with tab2:
-	st.image(images[st.session_state['current_image_index']])
 
 # Botões de navegação
 
-with tab2:
-	col1, col2, col3 = st.columns([1, 4, 1])
+with tab_galeria:
+	col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 1,1])
 	with col1:
 		if st.button("◀️ Anterior"):
 			prev_image()
 
-	with col3:
+	with col5:
 		if st.button("Próxima ▶️"):
 			next_image()
 
+	with col3:
+		st.image(images[st.session_state['current_image_index']])
+
+with tab_video:
+	col1, col2, col3 = st.columns([1,4,1])
+	with col2:
+		h = 300
+		container_style = f"""
+		<style>
+		.centered-container {{
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: {h}px;  /* Definindo a altura do container explicitamente */
+			border: 1px solid red;
+		}}
+		</style>
+		"""
+
+		# Aplica o estilo CSS
+		st.markdown(container_style, unsafe_allow_html=True)
+
+		# Adiciona o container com o texto centralizado
+		st.markdown('<div class="centered-container"><p>Em breve</p></div>', unsafe_allow_html=True)
+with tab_cv:
+	col1, col2, col3 = st.columns([1,4,1])
+	with col2:
+		st.title("Curriculum Alex Benjamin")
+		pdf_file_path = "./curriculum_alex_benjamin.pdf"
+		pdf_data = ""
+		with open(pdf_file_path, "rb") as f:
+			pdf_data = f.read()
+		st.download_button(
+			label="Baixar PDF",
+			data=pdf_data,
+			file_name="curriculum_alex_benjamin.pdf",
+			mime="application/pdf"
+		)
+		base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
+		pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+		st.write('Visuzalição do PDF (Apenas para desktop):')
+		st.markdown(pdf_display, unsafe_allow_html=True)		
+with tab_contato:
+	col1,col2,col3,col4 = st.columns([1,1,3,3])
+	with col1:
+		st.image(image="./whatsapp.png")
+		st.link_button(label="WhatsApp",url="https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!")
+		#st.markdown('<a href="https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!"><img src="whatsapp.png" alt="Descrição da Imagem" style="width:100%;"></a>', unsafe_allow_html=True)
+		#st.markdown("[![Whatsapp](whatsapp.png)](https://wa.me/5511965590645?text=Ol%C3%A1,%20gostaria%20de%20saber%20um%20pouco%20mais%20sobre%20o%20seu%20perfil!)")
+	with col2:
+		st.image(image="./linkedin.png")
+		st.link_button(label="Linkedin",url="http://www.linkedin.com/in/alex-benjamin-43b1b438")
+
+
+sidebar()
