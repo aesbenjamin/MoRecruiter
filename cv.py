@@ -17,8 +17,13 @@ from io import BytesIO
 import keyword_list
 import base64
 import translate
+from dotenv import load_dotenv
 
-os.environ["OPENAI_API_KEY"] = "sk-MDwTK2Wq87oN3qR25-ElhN2XuIU00s_EyGG6QwTqr6T3BlbkFJQXFecaGZq73YsgSeJNVu8EgcDDhB3AVHMFpvp7XDAA"
+# Carrega as variáveis do arquivo .env
+load_dotenv()
+
+# Acessa os atributos
+api_key = os.getenv('OPENAI_API_KEY')
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
