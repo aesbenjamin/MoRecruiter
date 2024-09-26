@@ -20,11 +20,7 @@ import translate
 from dotenv import load_dotenv
 
 # Carrega as variáveis do arquivo .env
-load_dotenv()
-
-# Acessa os atributos
-api_key = os.getenv('OPENAI_API_KEY')
-os.environ["OPENAI_API_KEY"] = api_key
+os.environ["OPENAI_API_KEY"] = "sk-MDwTK2Wq87oN3qR25-ElhN2XuIU00s_EyGG6QwTqr6T3BlbkFJQXFecaGZq73YsgSeJNVu8EgcDDhB3AVHMFpvp7XDAA"
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 if 'language' not in st.session_state:
