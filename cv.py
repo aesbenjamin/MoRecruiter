@@ -1,5 +1,5 @@
 import streamlit as st
-
+import streamlit.components.v1 as components
 from PIL import Image
 import os
 from llama_index.llms.openai import OpenAI
@@ -309,8 +309,10 @@ with tab_cv:
 			style="overflow: auto; width: 700px; height: 1000px;">"""
 		txt_vis = translate.txt_vis[language]
 		st.write(txt_vis)
-		st.markdown(pdf_display, unsafe_allow_html=True)		
-
+		#st.markdown(pdf_display, unsafe_allow_html=True)		
+		with open("curriculum_alex_benjamin.html", "r", encoding="utf-8") as f:
+			html_content = f.read()
+		components.html(html_content, height=700)
 with tab_contato:
 	col1,col2,col3,col4 = st.columns([3,1,1,3])
 	with col2:
