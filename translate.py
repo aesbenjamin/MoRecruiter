@@ -46,7 +46,7 @@ def get_analise(title:str, options:str):
 						{options}
 						\n
 						Ao final, gere um relatório e um índice de conformidade, que representa um percentual
-						de capacitação do Alex em relação as palavras-chave.
+						de capacitação do Alex em relação as palavras-chave e a descrição da vaga.
 						""",
 						f"""
 						Analyze if Alex has the skills listed below:
@@ -57,7 +57,7 @@ def get_analise(title:str, options:str):
 						\n  
 						{options}
 						\n
-						At the end, generate a report and a compliance index, which represents a percentage of Alex's skills in relation to the keywords.
+						At the end, generate a report and a compliance index, which represents a percentage of Alex's skills in relation to the keywords and the job description.
 						"""
 						]
 	return analise
