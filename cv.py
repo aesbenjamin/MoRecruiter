@@ -47,7 +47,7 @@ chat_analise = st.session_state['chat_analise']
 
 
 st.set_page_config(
-	page_title="Alex Benjamin - Meet this IT Profissional",
+	page_title="Alex Benjamin - Meet this IT Professional",
 	page_icon=":trophy:",
 	layout="wide",
 	initial_sidebar_state="expanded",
