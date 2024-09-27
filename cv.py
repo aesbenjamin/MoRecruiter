@@ -299,7 +299,14 @@ with tab_cv:
 			mime="application/pdf"
 		)
 		base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
-		pdf_display = f'<object data="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="700" height="1000"></object>'
+		#pdf_display = f'<object data="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="700" height="1000"></object>'
+		#pdf_display = f'<iframe src="{pdf_file_path}" type="application/pdf" width="700" height="1000"></iframe>'
+		pdf_display =  f"""<embed
+			class="pdfobject"
+			type="application/pdf"
+			title="Embedded PDF"
+			src="data:application/pdf;base64,{base64_pdf}"
+			style="overflow: auto; width: 700px; height: 1000px;">"""
 		txt_vis = translate.txt_vis[language]
 		st.write(txt_vis)
 		st.markdown(pdf_display, unsafe_allow_html=True)		
