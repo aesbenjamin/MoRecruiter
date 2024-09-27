@@ -66,7 +66,7 @@ sidebar_txt1 = ["""
 			Alex Benjamin
 			\n
 			Líder em Modernização de Sistemas Legados, especialista em 
-			Inteligência Artifical Generativa e Engenheiro de Software há mais 18 anos.
+			Inteligência Artificial Generativa e Engenheiro de Software há mais de 18 anos.
 			\n
 			Utilize o chat ao lado para conhecer um pouco de mim e minhas qualificações.	
 			""",
