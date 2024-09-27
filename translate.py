@@ -61,7 +61,7 @@ def get_analise(title:str, options:str):
 						"""
 						]
 	return analise
-txt_vis=['Visuzalição do PDF (Apenas para desktop):',"PDF Preview (Desktop only):"]
+txt_vis=['Visualização do PDF:',"PDF Preview:"]
 sidebar_txt1 = ["""
 			Alex Benjamin
 			\n
