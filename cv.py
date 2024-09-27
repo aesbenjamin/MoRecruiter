@@ -309,8 +309,9 @@ with tab_cv:
 			style="overflow: auto; width: 700px; height: 1000px;">"""
 		txt_vis = translate.txt_vis[language]
 		st.write(txt_vis)
-		#st.markdown(pdf_display, unsafe_allow_html=True)		
-		with open("curriculum_alex_benjamin.html", "r", encoding="utf-8") as f:
+		#st.markdown(pdf_display, unsafe_allow_html=True)	
+		pdf_html_name = translate.pdf_html_name
+		with open(pdf_html_name, "r", encoding="utf-8") as f:
 			html_content = f.read()
 		components.html(html_content, height=700)
 with tab_contato:
