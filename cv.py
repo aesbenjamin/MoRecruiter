@@ -226,12 +226,16 @@ with col2:
 	if st.button("Português"):
 		st.session_state['language'] = 0
 		del st.session_state['messages']
+		del st.session_state['chat']
+		del st.session_state['index']
 		st.rerun()
 
 with col3:
 	if st.button("English"):
 		st.session_state['language'] = 1
 		del st.session_state['messages']
+		del st.session_state['chat']
+		del st.session_state['index']
 		st.rerun()
 
 tab_list = translate.tab_list[language]
