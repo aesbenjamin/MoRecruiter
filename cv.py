@@ -32,7 +32,7 @@ system = translate.system[language]
 
 llm = OpenAI(temperature=0, model="gpt-4o-mini", system_prompt=system)
 Settings.llm = llm
-Settings.embed_model = OpenAIEmbedding(model_name="text-embedding-3-small")
+Settings.embed_model = OpenAIEmbedding(model_name="text-embedding-3-large")
 
 if 'index' not in st.session_state:
 	index_tr = load_index_from_storage(StorageContext.from_defaults(persist_dir="./vecCv"))
