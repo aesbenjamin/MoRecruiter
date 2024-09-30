@@ -24,7 +24,7 @@ os.environ["OPENAI_API_KEY"] = st.secrets['secrets']['OPENAI_API_KEY']
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 if 'language' not in st.session_state:
-	st.session_state['language'] = 0
+	st.session_state['language'] = 1
 
 language = st.session_state['language']
 
