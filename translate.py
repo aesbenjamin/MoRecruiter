@@ -25,7 +25,7 @@ init_msg = ["""
 				""",
 				"""
 			Hello, I am the clone of Alex Benjamin. Feel free to ask professional or even personal questions, 
-			such as curiosities or hobbies\n
+			such as curiosities or hobbies :D\n
 
 			If you prefer, you can use the compliance analysis on the right side of this chat, a simple and easy way to assess if I am the ideal candidate for your position.
 			"""]
