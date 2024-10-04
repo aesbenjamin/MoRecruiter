@@ -50,7 +50,7 @@ st.set_page_config(
 	page_title="Alex Benjamin - Meet this IT Professional",
 	page_icon=":trophy:",
 	layout="wide",
-	initial_sidebar_state="expanded",
+	initial_sidebar_state="collapsed",
 )
 
 def get_pdf2():
@@ -230,13 +230,13 @@ with col2:
 		del st.session_state['index']
 		st.rerun()
 
-with col3:
-	if st.button("English"):
-		st.session_state['language'] = 1
-		del st.session_state['messages']
-		del st.session_state['chat']
-		del st.session_state['index']
-		st.rerun()
+#with col3:
+#	if st.button("English"):
+#		st.session_state['language'] = 1
+#		del st.session_state['messages']
+#		del st.session_state['chat']
+#		del st.session_state['index']
+#		st.rerun()
 
 tab_list = translate.tab_list[language]
 tab_chat, tab_galeria, tab_video, tab_cv, tab_contato = st.tabs(tab_list)
