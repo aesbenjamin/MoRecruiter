@@ -18,16 +18,13 @@ txt_pdf = ["Gerar PDF","Generate PDF"]
 txt_baixar_pdf = ["Baixar PDF", "Download PDF"]
 init_msg = ["""
 				Olá, eu sou o clone do Alex Benjamin. Fique à vontade para fazer perguntas 
-				profissionais, ou até mesmo pessoais, como curiosidades, ou hobbies :D\n
-				Se você preferir, pode utilizar a análise de conformidade, do lado direito desse chat,
-				uma maneira simples e fácil de analisar se eu sou o candidato ideal para a sua vaga.								
+				profissionais, ou até mesmo pessoais, como hobbies. Utilize a análise de conformidade, uma maneira simples e fácil
+			    de analisar se eu sou o candidato ideal para a sua vaga.								
 
 				""",
 				"""
 			Hello, I am the clone of Alex Benjamin. Feel free to ask professional or even personal questions, 
-			such as curiosities or hobbies :D\n
-
-			If you prefer, you can use the compliance analysis on the right side of this chat, a simple and easy way to assess if I am the ideal candidate for your position.
+			such as hobbies. Use the compliance analysis, a simple and easy way to assess if I am the ideal candidate for your position.
 			"""]
 txt_multi = [
 	"Escolha palavras-chave para analisar o índice de alinhamento das capacitações do Alex com a vaga proposta:",

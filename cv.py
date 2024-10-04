@@ -219,7 +219,7 @@ def sidebar():
 	cont.write(sidebar_txt2)
 	cont.link_button("MoMapping", "https://site.momapping.com.br")
 
-col1, col2, col3, col4 = st.columns([2,1,1,4])
+col1, col2 = st.columns([2,6])
 with col1:
 	st.subheader("MoRecruiter")
 with col2: 
